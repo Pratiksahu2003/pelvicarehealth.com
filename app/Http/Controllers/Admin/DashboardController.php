@@ -11,6 +11,10 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
+        if ($user === null) {
+            return redirect()->guest(route('login'));
+        }
+
         if ($user->isSuperAdmin()) {
             return redirect()->route('super-admin.dashboard');
         } elseif ($user->isAdmin()) {

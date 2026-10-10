@@ -8,8 +8,8 @@ use App\Http\Controllers\Admin\PatientController;
 use App\Http\Controllers\Admin\ContentController;
 use App\Http\Controllers\Admin\PostController;
 
-// Admin Dashboard - Redirects based on role
-Route::get('/admin', [DashboardController::class, 'index'])->name('admin.dashboard');
+// Admin Dashboard - Redirects based on role (must be logged in)
+Route::middleware('auth')->get('/admin', [DashboardController::class, 'index'])->name('admin.dashboard');
 
 // Super Admin Routes
 Route::middleware(['auth', 'role:super_admin'])->prefix('admin/super-admin')->name('super-admin.')->group(function () {
