@@ -5,14 +5,6 @@
 
     RewriteEngine On
 
-    # Block scanner/bot paths (skip PHP bootstrap — saves Hostinger entry processes)
-    RewriteRule ^wp-admin(/|$) - [F,L]
-    RewriteRule ^wp-includes/ - [F,L]
-    RewriteRule ^wp-content/ - [F,L]
-    RewriteRule ^wp-login\.php$ - [F,L]
-    RewriteRule ^xmlrpc\.php$ - [F,L]
-    RewriteRule ^\.env$ - [F,L]
-
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
