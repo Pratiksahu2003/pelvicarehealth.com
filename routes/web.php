@@ -16,6 +16,7 @@ Route::get('/media/{path}', [PublicMediaController::class, 'show'])
     ->name('media.public');
 
 Route::get('/deploy/run', [DeployController::class, 'run'])->name('deploy.run');
+Route::get('/deploy/db-check', [DeployController::class, 'dbCheck'])->name('deploy.db-check');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');

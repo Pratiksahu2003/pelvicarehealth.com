@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -16,16 +17,14 @@ class DeployController extends Controller
 {
     public function run(Request $request): JsonResponse
     {
-        $token = (string) config('deploy.token', '');
-        if ($token === '') {
+        if ((string) config('deploy.token', '') === '') {
             return response()->json([
                 'status' => 'error',
                 'message' => 'DEPLOY_TOKEN is not set in .env on the server.',
             ], Response::HTTP_FORBIDDEN);
         }
 
-        $provided = (string) ($request->query('token') ?? $request->header('X-Deploy-Token', ''));
-        if (! hash_equals($token, $provided)) {
+        if (! $this->tokenMatches($request)) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Invalid deploy token.',
@@ -37,6 +36,7 @@ class DeployController extends Controller
         $steps['removed_stale_bootstrap_cache'] = $this->removeStaleBootstrapCache();
 
         foreach ([
+            'config_clear' => ['config:clear', []],
             'migrate' => ['migrate', ['--force' => true]],
             'storage_link' => ['storage:link', []],
             'optimize' => ['optimize', []],
@@ -85,5 +85,67 @@ class DeployController extends Controller
         }
 
         return ['removed' => $removed];
+    }
+
+    public function dbCheck(Request $request): JsonResponse
+    {
+        if (! $this->tokenMatches($request)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invalid or missing deploy token.',
+            ], Response::HTTP_FORBIDDEN);
+        }
+
+        $this->removeStaleBootstrapCache();
+        Artisan::call('config:clear');
+
+        $connection = (string) config('database.default');
+        $mysql = config('database.connections.mysql');
+
+        $summary = [
+            'connection' => $connection,
+            'host' => $mysql['host'] ?? null,
+            'port' => $mysql['port'] ?? null,
+            'database' => $mysql['database'] ?? null,
+            'username' => $mysql['username'] ?? null,
+            'password_set' => ($mysql['password'] ?? '') !== '',
+        ];
+
+        try {
+            DB::connection()->getPdo();
+            DB::select('select 1 as ok');
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Database connection OK.',
+                'config' => $summary,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Database connection failed.',
+                'config' => $summary,
+                'error' => $e->getMessage(),
+                'hostinger_checklist' => [
+                    'In hPanel → Databases, copy MySQL Database, User, and Password for THIS hosting account (username prefix must match, e.g. u225235608_...).',
+                    'Assign the user to the database with All Privileges.',
+                    'Use DB_HOST=127.0.0.1 or localhost and DB_PORT=3306.',
+                    'If the password contains # or $, wrap DB_PASSWORD in double quotes in .env.',
+                    'After editing .env, delete bootstrap/cache/config.php or open /deploy/run?token=... again.',
+                ],
+            ], Response::HTTP_SERVICE_UNAVAILABLE);
+        }
+    }
+
+    private function tokenMatches(Request $request): bool
+    {
+        $token = (string) config('deploy.token', '');
+        if ($token === '') {
+            return false;
+        }
+
+        $provided = (string) ($request->query('token') ?? $request->header('X-Deploy-Token', ''));
+
+        return hash_equals($token, $provided);
     }
 }
