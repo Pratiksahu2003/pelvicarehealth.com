@@ -23,6 +23,7 @@ Write-Host "  - Document root: public_html/public"
 Write-Host ""
 Write-Host "On server .env set:" -ForegroundColor Green
 Write-Host "  APP_ENV=production  APP_DEBUG=false  APP_URL=https://your-domain.com"
+Write-Host "  READ_ENV_FROM_DOTENV=true"
 Write-Host "  DEPLOY_TOKEN=<long random string>"
 Write-Host ""
 Write-Host "Then open in browser (once):" -ForegroundColor Green

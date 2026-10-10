@@ -39,7 +39,10 @@ class DeployController extends Controller
             'config_clear' => ['config:clear', []],
             'migrate' => ['migrate', ['--force' => true]],
             'storage_link' => ['storage:link', []],
-            'optimize' => ['optimize', []],
+            // Do not run config:cache / optimize — it freezes old DB_* values in bootstrap/cache/config.php
+            'route_cache' => ['route:cache', []],
+            'view_cache' => ['view:cache', []],
+            'event_cache' => ['event:cache', []],
         ] as $label => [$command, $arguments]) {
             try {
                 Artisan::call($command, $arguments);
