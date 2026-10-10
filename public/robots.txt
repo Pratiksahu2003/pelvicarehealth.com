@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /login
+Disallow: /register
+Disallow: /doctor/register/
+Disallow: /book-appointment/confirmation/
+
+Sitemap: https://pelvicarehealth.com/sitemap.xml
