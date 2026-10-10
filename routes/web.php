@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ServiceController;
@@ -13,6 +14,20 @@ use App\Http\Controllers\PublicMediaController;
 Route::get('/media/{path}', [PublicMediaController::class, 'show'])
     ->where('path', '.*')
     ->name('media.public');
+
+Route::get('/optimize-app', function () {
+    Artisan::call('optimize');
+    $optimizeOutput = trim(Artisan::output());
+
+    Artisan::call('optimize:clear');
+    $clearOutput = trim(Artisan::output());
+
+    return response()->json([
+        'status' => 'success',
+        'optimize' => $optimizeOutput,
+        'optimize_clear' => $clearOutput,
+    ]);
+})->name('app.optimize');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
