@@ -495,7 +495,7 @@
       'public_html' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\Users\\prati\\Downloads\\pelvicarehealth.com\\public_html',
+        'root' => 'C:\\Users\\prati\\Downloads\\pelvicarehealth.com\\public',
         'url' => 'https://pelvicarehealth.com',
         'visibility' => 'public',
       ),

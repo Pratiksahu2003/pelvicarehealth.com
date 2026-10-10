@@ -50,7 +50,7 @@ return [
 
         'public_html' => [
             'driver' => 'local',
-            'root' => base_path(env('PUBLIC_DIR_NAME', 'public_html')),
+            'root' => public_path(),
             'url' => env('APP_URL'),
             'visibility' => 'public',
         ],

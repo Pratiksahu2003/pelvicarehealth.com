@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\LegacyPublicPath;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -37,8 +38,6 @@ class PublicMediaController extends Controller
             abort(404);
         }
 
-        $dirName = trim((string) env('PUBLIC_DIR_NAME', 'public_html'), '/\\');
-        
         // Define lookups (Primary and Alternatives for renamed folders)
         $pathsToTry = [$path];
         if (Str::startsWith($path, 'blog/')) {
@@ -60,10 +59,9 @@ class PublicMediaController extends Controller
                 return response()->file($storagePublic);
             }
 
-            // Check public_html/ (the fallback)
-            $alt = base_path($dirName.'/'.$p);
-            if (is_file($alt)) {
-                return response()->file($alt);
+            $legacy = LegacyPublicPath::filePath($p);
+            if ($legacy !== null) {
+                return response()->file($legacy);
             }
         }
 

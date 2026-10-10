@@ -44,10 +44,7 @@ class MediaUrl
             return asset('storage/'.$path);
         }
 
-        // Uploads saved only under public_html/ while APP serves from public/ (local .test)
-        $dirName = trim((string) env('PUBLIC_DIR_NAME', 'public_html'), '/\\');
-        
-        // Check primary and alternate fallback paths
+        // Check primary and alternate fallback paths (legacy sibling public_html/ on local dev)
         $pathsToTry = [$path];
         if (Str::startsWith($path, 'blog/')) {
             $pathsToTry[] = str_replace('blog/', 'blog_images/', $path);
@@ -56,8 +53,8 @@ class MediaUrl
         }
 
         foreach ($pathsToTry as $p) {
-            $publicHtmlFile = base_path($dirName.'/'.$p);
-            if (is_file($publicHtmlFile) && self::isMediaFallbackPath($p)) {
+            $publicHtmlFile = LegacyPublicPath::filePath($p);
+            if ($publicHtmlFile !== null && self::isMediaFallbackPath($p)) {
                 return route('media.public', ['path' => $p], false);
             }
         }
